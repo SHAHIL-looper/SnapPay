@@ -1,0 +1,208 @@
+<!-- Save this as create-notices.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Notices</title>
+ <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: white;
+    }
+
+    .left-panel, .right-panel {
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .left-panel {
+      width: 40%;
+      border-right: 2px solid #444;
+      background-color: rgba(0, 0, 0, 0.3);
+    }
+
+    .right-panel {
+      width: 60%;
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    h2 {
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      margin-top: 10px;
+      background-color: #111;
+      color: white;
+      border: 1px solid #555;
+      resize: none;
+    }
+
+    input[type="file"] {
+      margin-top: 10px;
+      display: block;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #00c6ff;
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-weight: bold;
+      border-radius: 5px;
+    }
+
+    .notice {
+      background-color: rgba(0, 0, 0, 0.4);
+      border: 1px solid #444;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .notice input[type="checkbox"] {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+
+    .notice-file {
+      margin-top: 10px;
+      color: #90ee90;
+    }
+
+    .notice-time {
+      font-size: 0.8em;
+      color: #aaa;
+      margin-top: 5px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="left-panel">
+    <h2>Create Notice</h2>
+    <textarea id="noticeText" placeholder="Type your notice here..."></textarea>
+    <input type="file" id="noticeFile">
+    <button onclick="publishNotice()">Publish Notice</button>
+  </div>
+
+  <div class="right-panel">
+    <div class="controls">
+      <input type="checkbox" id="selectAll" onchange="toggleAll(this)">
+      <label for="selectAll">Select All</label>
+      <button onclick="deleteSelected()">Delete Selected</button>
+    </div>
+    <h2>Published Notices</h2>
+    <div id="noticeBoard"></div>
+  </div>
+
+  <script>
+    // Load notices on page load
+    window.onload = () => {
+      loadNotices();
+    };
+
+    function publishNotice() {
+      const text = document.getElementById("noticeText").value.trim();
+      const fileInput = document.getElementById("noticeFile");
+      const file = fileInput.files[0];
+
+      if (!text) {
+        alert("Please write a notice.");
+        return;
+      }
+
+      const timestamp = new Date().toLocaleString();
+      const notice = {
+        id: Date.now(),
+        text,
+        fileName: file ? file.name : null,
+        fileURL: file ? URL.createObjectURL(file) : null,
+        time: timestamp
+      };
+
+      let notices = JSON.parse(localStorage.getItem("notices") || "[]");
+      notices.push(notice);
+      localStorage.setItem("notices", JSON.stringify(notices));
+
+      addNoticeToBoard(notice);
+
+      document.getElementById("noticeText").value = '';
+      fileInput.value = '';
+    }
+
+    function addNoticeToBoard(notice) {
+      const noticeBoard = document.getElementById("noticeBoard");
+
+      const noticeDiv = document.createElement("div");
+      noticeDiv.className = "notice";
+      noticeDiv.setAttribute("data-id", notice.id);
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      noticeDiv.appendChild(checkbox);
+
+      const content = document.createElement("div");
+      content.innerHTML = `<p>${notice.text}</p>`;
+      if (notice.fileName && notice.fileURL) {
+        content.innerHTML += `<div class="notice-file"><a href="${notice.fileURL}" download="${notice.fileName}">${notice.fileName}</a></div>`;
+      }
+      content.innerHTML += `<div class="notice-time">Published on: ${notice.time}</div>`;
+      noticeDiv.appendChild(content);
+
+      noticeBoard.appendChild(noticeDiv);
+    }
+
+    function loadNotices() {
+      const notices = JSON.parse(localStorage.getItem("notices") || "[]");
+      notices.forEach(addNoticeToBoard);
+    }
+
+    function toggleAll(source) {
+      const checkboxes = document.querySelectorAll("#noticeBoard .notice input[type='checkbox']");
+      checkboxes.forEach(cb => cb.checked = source.checked);
+    }
+
+    function deleteSelected() {
+      const checkboxes = document.querySelectorAll("#noticeBoard .notice input[type='checkbox']");
+      let notices = JSON.parse(localStorage.getItem("notices") || "[]");
+
+      checkboxes.forEach(cb => {
+        if (cb.checked) {
+          const noticeDiv = cb.closest(".notice");
+          const id = parseInt(noticeDiv.getAttribute("data-id"));
+          notices = notices.filter(n => n.id !== id);
+          noticeDiv.remove();
+        }
+      });
+
+      localStorage.setItem("notices", JSON.stringify(notices));
+      document.getElementById("selectAll").checked = false;
+    }
+  </script>
+
+</body>
+</html>

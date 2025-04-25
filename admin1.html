@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0f172a;
+      color: #e2e8f0;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 20%;
+      background-color: #1e293b;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sidebar .profile {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .sidebar .profile img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .profile-controls {
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      top: 50px;
+      left: 0;
+      background-color: #1e293b;
+      border-radius: 5px;
+      z-index: 10;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+
+    .profile:hover .profile-controls {
+      display: flex;
+    }
+
+    .profile-controls button {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 12px;
+      width: 140px;
+      text-align: left;
+    }
+
+    .sidebar button {
+      background-color: #334155;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .sidebar button:hover {
+      background-color: #3b82f6;
+    }
+
+    .content {
+      width: 80%;
+      padding: 20px;
+      background-color: #0f172a;
+      overflow-y: auto;
+    }
+
+    .log-entry {
+      background: #1e293b;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    if (sessionStorage.getItem("user") !== "admin") {
+      alert("Access Denied: Not logged in as administrator.");
+      window.location.href = "index.html";
+    }
+  </script>
+
+  <div class="container">
+    <div class="sidebar">
+      <div class="profile">
+        <img id="profileImage" src="admin_profile.jpg" alt="Admin Picture">
+        <div>Admin</div>
+        <div class="profile-controls">
+          <button onclick="document.getElementById('fileInput').click()">Add from Computer</button>
+          <button onclick="removeProfileImage()">Remove</button>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" onchange="updateProfileImage(event)">
+      </div>
+      <button onclick="loadContent('employee_records')">Employee Records</button>
+      <button onclick="loadContent('employee_attendance')">Employee Attendance</button>
+      <button onclick="loadContent('history')">History</button>
+      <button onclick="loadContent('leave_requests')">Leave Requests</button>
+      
+      <button onclick="toggleClock()" id="clockBtn">Clock In</button>
+      <button onclick="loadContent('work_repo')">WORK Repo</button>
+      <button onclick="loadContent('salary')">Salary</button>
+      <button onclick="loadContent('salary_calculator')">Salary Calculator</button>
+      <button onclick="loadContent('notice')">Notice</button>
+      <button onclick="loadContent('mark_attendance')">Mark Attendance</button>
+      <button onclick="loadContent('red_list')">Red List</button>
+      <button onclick="loadContent('profile')">Profile</button>
+      <button onclick="logout()">Logout</button>
+    </div>
+    <div class="content" id="content-area">
+      <h2>Welcome, Admin</h2>
+      <p>Select an option from the sidebar to get started.</p>
+    </div>
+  </div>
+
+  <script>
+    let clockInTime = null;
+    let logs = JSON.parse(localStorage.getItem("adminLogs") || "[]");
+
+    function loadContent(section) {
+      let content = "";
+      switch (section) {
+        case 'employee_records':
+          content = `<h3>Employee Records</h3><p>Dummy employee list...</p>`;
+          break;
+        case 'employee_attendance':
+          content = `<h3>Employee Attendance</h3><p>Attendance logs...</p>`;
+          break;
+        case 'history':
+          content = '<h3>Activity History</h3>' + logs.map(l => `<div class='log-entry'>${l.time}: ${l.action}</div>`).join('');
+          break;
+        case 'leave_requests':
+          content = `<h3>Leave Requests</h3><p>Pending requests shown here...</p>`;
+          break;
+      
+        case 'work_repo':
+          content = `<h3>WORK Repo</h3>` + logs.filter(l => l.action.includes('Clock')).map(l => `<div class='log-entry'>${l.time}: ${l.action}</div>`).join('');
+          break;
+        case 'salary':
+          content = `<h3>Salary</h3><p>Salary details...</p>`;
+          break;
+        case 'salary_calculator':
+          content = `<h3>Salary Calculator</h3><p>Calculate salaries here...</p>`;
+          break;
+        case 'notice':
+          content = `<h3>Notice</h3><p>Notices posted...</p>`
+		   window.location.href = "create-notices.html";
+          break;
+        case 'mark_attendance':
+          content = `<h3>Mark Attendance</h3><p>Marked attendance at: ${new Date().toLocaleString()}</p>`
+		  window.location.href = "mark_attendance5.html";
+          saveHistory("Attendance marked");
+          break;
+        case 'red_list':
+          content = `<h3>Red List</h3><p>Flagged employees...</p>`;
+          break;
+        case 'profile':
+          content = `<h3>Admin Profile</h3><p>Name: Jane Admin<br>Email: admin@company.com</p>`;
+          break;
+        default:
+          content = `<p>Content for ${section}</p>`;
+      }
+      document.getElementById("content-area").innerHTML = content;
+      saveHistory(`Opened ${section}`);
+    }
+
+    function toggleClock() {
+      const btn = document.getElementById("clockBtn");
+      const now = new Date();
+      if (!clockInTime) {
+        clockInTime = now;
+        btn.textContent = "Clock Out";
+        alert("Clocked In at " + now.toLocaleTimeString());
+        saveHistory(`Clocked in at ${now.toLocaleString()}`);
+      } else {
+        const diff = ((now - clockInTime) / 1000 / 60 / 60).toFixed(2);
+        clockInTime = null;
+        btn.textContent = "Clock In";
+        alert("Clocked Out at " + now.toLocaleTimeString() + " - Worked " + diff + " hrs");
+        saveHistory(`Clocked out at ${now.toLocaleString()} - Worked ${diff} hrs`);
+      }
+    }
+
+    function saveHistory(log) {
+      const entry = { time: new Date().toLocaleTimeString(), action: log };
+      logs.push(entry);
+      localStorage.setItem("adminLogs", JSON.stringify(logs));
+    }
+
+    function updateProfileImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function () {
+        document.getElementById("profileImage").src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeProfileImage() {
+      document.getElementById("profileImage").src = "admin_profile.jpg";
+    }
+
+    function logout() {
+      sessionStorage.removeItem("user");
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!-- Save this as view-notices.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Notice Board</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 30px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    .notice {
+      background-color: rgba(0, 0, 0, 0.4);
+      border: 1px solid #444;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+    }
+
+    .notice-file {
+      margin-top: 10px;
+      color: #90ee90;
+    }
+
+    .notice-time {
+      font-size: 0.8em;
+      color: #aaa;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Published Notices</h2>
+  <div id="noticeBoard"></div>
+
+  <script>
+    window.onload = () => {
+      const notices = JSON.parse(localStorage.getItem("notices") || "[]");
+      const noticeBoard = document.getElementById("noticeBoard");
+
+      if (notices.length === 0) {
+        noticeBoard.innerHTML = "<p>No notices available.</p>";
+        return;
+      }
+
+      notices.forEach(notice => {
+        const div = document.createElement("div");
+        div.className = "notice";
+        div.innerHTML = `<p>${notice.text}</p>`;
+        if (notice.fileName && notice.fileURL) {
+          div.innerHTML += `<div class="notice-file"><a href="${notice.fileURL}" download="${notice.fileName}">${notice.fileName}</a></div>`;
+        }
+        div.innerHTML += `<div class="notice-time">Published on: ${notice.time}</div>`;
+        noticeBoard.appendChild(div);
+      });
+    };
+  </script>
+
+</body>
+</html>

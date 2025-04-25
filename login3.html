@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Page</title>
+  <style>
+    .toggle-darkmode span.highlighted {
+      font-weight: bold;
+      color: white;
+      transition: color 0.3s;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0f172a;
+      color: #e2e8f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .container {
+      background-color: #1e293b;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      width: 300px;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .toggle-darkmode {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 20px;
+      color: greenyellow;
+    }
+
+    .slider {
+      position: relative;
+      width: 50px;
+      height: 24px;
+      background: #ccc;
+      border-radius: 30px;
+      cursor: pointer;
+    }
+
+    .slider:before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: white;
+      top: 2px;
+      left: 2px;
+      transition: all 0.3s;
+    }
+
+    .slider.active {
+      background: #3b82f6;
+    }
+
+    .slider.active:before {
+      transform: translateX(26px);
+    }
+
+    .role-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      gap: 10px;
+    }
+
+    .role-buttons button {
+      width: 100%;
+      background-color: #3b82f6;
+    }
+
+    .role-buttons button.active {
+      background-color: #60a5fa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="role-buttons">
+      <button id="btn-employee" onclick="selectRole('employee')" class="active">Employee</button>
+      <button id="btn-admin" onclick="selectRole('admin')">Admin</button>
+    </div>
+    <h2 id="loginTitle">Login as Employee</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+
+    <div class="toggle-darkmode">
+      <span>Light Mode</span>
+      <div class="slider" onclick="toggleDarkMode()"></div>
+    </div>
+  </div>
+
+  <script>
+    const body = document.body;
+    const slider = document.querySelector('.slider');
+    let currentRole = 'employee';
+
+    function toggleDarkMode() {
+      body.classList.toggle('light');
+      slider.classList.toggle('active');
+      const modeText = document.querySelector('.toggle-darkmode span');
+
+      if (body.classList.contains('light')) {
+        body.style.backgroundColor = '#f1f5f9';
+        body.style.color = '#1e293b';
+        localStorage.setItem('darkmode', 'off');
+        modeText.classList.add('highlighted');
+      } else {
+        body.style.backgroundColor = '#0f172a';
+        body.style.color = '#e2e8f0';
+        localStorage.setItem('darkmode', 'on');
+        modeText.classList.remove('highlighted');
+      }
+    }
+
+    function applySavedDarkMode() {
+      const savedMode = localStorage.getItem('darkmode');
+      if (savedMode === 'off') {
+        toggleDarkMode();
+      }
+    }
+
+    function selectRole(role) {
+      currentRole = role;
+      document.getElementById('loginTitle').textContent = `Login as ${role.charAt(0).toUpperCase() + role.slice(1)}`;
+
+      // Update button styles
+      document.getElementById('btn-employee').classList.remove('active');
+      document.getElementById('btn-admin').classList.remove('active');
+
+      if (role === 'employee') {
+        document.getElementById('btn-employee').classList.add('active');
+      } else {
+        document.getElementById('btn-admin').classList.add('active');
+      }
+    }
+
+    function login() {
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
+
+      if (currentRole === 'admin' && user === 'admin' && pass === '1234') {
+        sessionStorage.setItem('user', 'admin');
+        window.location.href = 'admin1.html';
+      } else if (currentRole === 'employee' && user === '12Esh' && pass === '3456') {
+        sessionStorage.setItem('user', 'employee');
+        window.location.href = 'employee1.html';
+      } else {
+        alert("Invalid credentials for selected role");
+      }
+    }
+
+    applySavedDarkMode();
+  </script>
+</body>
+</html>

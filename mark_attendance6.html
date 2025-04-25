@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mark Attendance</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background-color: #f4f4f4;
+      text-align: center;
+    }
+    video, canvas, img {
+      width: 100%;
+      max-width: 400px;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+    button, input {
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    input {
+      width: 80%;
+    }
+    .form-section {
+      margin-top: 20px;
+      background-color: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: inline-block;
+    }
+    .records {
+      margin-top: 30px;
+      text-align: left;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .record {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    .record img {
+      max-width: 100px;
+      display: block;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Mark Attendance</h2>
+  <button onclick="startCamera()">Start Camera</button>
+  <button onclick="stopCamera()">Cancel</button>
+  <button onclick="logout()">Logout</button>
+
+  <br />
+  <video id="video" autoplay muted></video>
+  <canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
+
+  <div class="form-section">
+    <img id="captured" style="display:none;" />
+    <button id="clickPictureBtn" onclick="captureImage()" style="display:none;">Click Picture</button>
+    <br />
+    <input type="text" id="name" placeholder="Employee Name" /><br />
+    <input type="text" id="empId" placeholder="Employee ID" /><br />
+    <button onclick="saveDetails()">Save Attendance</button>
+    <button onclick="clearRecords()">Clear Records</button>
+  </div>
+
+  <div class="records" id="recordsContainer">
+    <h3>Saved Attendance Records</h3>
+  </div>
+
+  <script>
+    let stream;
+    let video;
+    let canvas;
+    let capturedImage;
+
+    window.onload = function () {
+      const user = sessionStorage.getItem('user');
+      if (!user) {
+        alert('You must be logged in to view this page.');
+        window.location.href = 'login3.html';
+        return;
+      }
+
+      video = document.getElementById('video');
+      canvas = document.getElementById('canvas');
+      capturedImage = document.getElementById('captured');
+      loadRecords();
+    };
+
+    function startCamera() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(s => {
+          stream = s;
+          video.srcObject = stream;
+          video.play();
+          document.getElementById('clickPictureBtn').style.display = 'inline-block';
+        })
+        .catch(err => {
+          alert('Camera access denied or not available.');
+        });
+    }
+
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      video.srcObject = null;
+    }
+
+    function captureImage() {
+      const context = canvas.getContext('2d');
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/png');
+      capturedImage.src = dataUrl;
+      capturedImage.style.display = 'block';
+
+      // Hide click button after picture is taken
+      document.getElementById('clickPictureBtn').style.display = 'none';
+    }
+
+    function saveDetails() {
+      const name = document.getElementById('name').value;
+      const empId = document.getElementById('empId').value;
+      const photo = capturedImage.src;
+
+      if (!name || !empId || !photo || photo.includes('blank')) {
+        alert('Please fill all fields and capture a photo.');
+        return;
+      }
+
+      const record = { name, empId, photo };
+      let records = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
+      records.push(record);
+      localStorage.setItem('attendanceRecords', JSON.stringify(records));
+      loadRecords();
+
+      alert(`Attendance saved for ${name} (ID: ${empId})`);
+    }
+
+    function loadRecords() {
+      const recordsContainer = document.getElementById('recordsContainer');
+      recordsContainer.innerHTML = '<h3>Saved Attendance Records</h3>';
+      const records = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
+      records.forEach(rec => {
+        const div = document.createElement('div');
+        div.className = 'record';
+        div.innerHTML = `
+          <img src="${rec.photo}" alt="Captured Image"/>
+          <strong>Name:</strong> ${rec.name}<br/>
+          <strong>Employee ID:</strong> ${rec.empId}
+        `;
+        recordsContainer.appendChild(div);
+      });
+    }
+
+    function clearRecords() {
+      if (confirm('Are you sure you want to clear all attendance records?')) {
+        localStorage.removeItem('attendanceRecords');
+        loadRecords();
+      }
+    }
+
+    function logout() {
+      sessionStorage.removeItem('user');
+      window.location.href = 'login3.html';
+    }
+  </script>
+</body>
+</html>

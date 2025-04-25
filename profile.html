@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Page</title>
+    <style>
+        /* Basic Styles for the page */
+        body {
+            background-color: #1e1e2f; /* Techy blue-black */
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #282c36;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            text-align: center;
+        }
+
+        .container h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        input[type="text"], input[type="email"], input[type="password"], input[type="tel"] {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+        }
+
+        button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .save-btn {
+            width: 100%;
+        }
+
+        .edit-btn {
+            background-color: #28a745;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .edit-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>User Profile</h1>
+        
+        <!-- Editable profile form -->
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" value="JohnDoe123" disabled>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" value="password123" disabled>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" value="johndoe@example.com" disabled>
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" value="+1234567890" disabled>
+        </div>
+
+        <div class="form-group">
+            <label for="department">Department</label>
+            <input type="text" id="department" value="IT" disabled>
+        </div>
+
+        <div class="form-group">
+            <label for="post">Post</label>
+            <input type="text" id="post" value="Software Developer" disabled>
+        </div>
+
+        <!-- Save Button -->
+        <button id="save-btn" class="save-btn" disabled>Save</button>
+        
+        <!-- Edit Button -->
+        <button id="edit-btn" class="edit-btn">Edit</button>
+    </div>
+
+    <script>
+        // DOM Elements
+        const editBtn = document.getElementById("edit-btn");
+        const saveBtn = document.getElementById("save-btn");
+        const fields = document.querySelectorAll("input");
+        
+        // Enable fields when edit is clicked
+        editBtn.addEventListener("click", () => {
+            fields.forEach(field => field.disabled = false);
+            saveBtn.disabled = false; // Enable save button
+            editBtn.style.display = "none"; // Hide edit button after edit
+        });
+
+        // Save the data when save is clicked
+        saveBtn.addEventListener("click", () => {
+            const userData = {
+                username: document.getElementById("username").value,
+                password: document.getElementById("password").value,
+                email: document.getElementById("email").value,
+                phone: document.getElementById("phone").value,
+                department: document.getElementById("department").value,
+                post: document.getElementById("post").value
+            };
+            
+            // Display the saved data in console (You could store it in a server or database)
+            console.log("Saved Profile Data:", userData);
+            
+            // Disable the fields after save
+            fields.forEach(field => field.disabled = true);
+            saveBtn.disabled = true; // Disable save button
+            editBtn.style.display = "block"; // Show the edit button
+        });
+    </script>
+</body>
+</html>
